@@ -34,12 +34,14 @@ expr
     | term - minus
     | term
 
+term
+    : factor * term
+    | factor
+
 minus
     : term
     | term - minus
 
-term
-    : factor
 
 factor
     : n
@@ -47,3 +49,6 @@ factor
     | func
     | LPAREN expr RPAREN
     | IF expr THEN expr ELSE expr
+
+func
+    : ID LPAREN ID RPAREN
