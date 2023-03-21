@@ -20,11 +20,10 @@ let getOp op =
 
 prog: funcn SEMICOLON expr SEMICOLON decn SEMICOLON EOF { $1 }
 
-funcn
+funcn // function declaration, aka first part in parser
     : ID LPAREN RPAREN EQ expr
     | ID LPAREN params RPAREN EQ expr
-    | ID LPAREN RPAREN EQ expr COMMA funcn
-    | ID LPAREN params RPAREN EQ expr COMMA funcn
+    | funcn COMMA funcn // multiple declarations
 
 params
     : ID
