@@ -9,13 +9,42 @@ let getOp op =
 
 %token <int> Number
 %token <string> OP
+%token <string> ID
 %token EOF LPAREN RPAREN
-%start parse
-%type <int> parse
+       IF THEN ELSE UNDEF
+       COLON SEMICOLON COMMA EQ
+
+%start prog
+%type <int> prog
 %%
 
-parse: expr EOF        	     { $1 }
+prog: funcn SEMICOLON expr SEMICOLON decn SEMICOLON EOF { $1 }
 
-expr: Number                 { $1 }
-    | expr OP expr           { (getOp $2) $1 $3 }
-    | LPAREN expr RPAREN     { $2 }
+funcn
+    : ID LPAREN RPAREN EQ expr
+    | ID LPAREN params RPAREN EQ expr
+    | ID LPAREN RPAREN EQ expr COMMA funcn
+    | ID LPAREN params RPAREN EQ expr COMMA funcn
+
+params
+    : ID
+    | ID COMMA params
+
+expr
+    : term + expr
+    | term - minus
+    | term
+
+minus
+    : term
+    | term - minus
+
+term
+    : factor
+
+factor
+    : n
+    | var
+    | func
+    | LPAREN expr RPAREN
+    | IF expr THEN expr ELSE expr
