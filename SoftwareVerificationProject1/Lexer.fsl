@@ -17,6 +17,7 @@ let Uid = ['A'-'Z' '_'] idbody
 let Lid = ['a'-'z' '_'] idbody
 let id = Uid | Lid
 
+
 rule tokenize = parse
 | whitespace        { tokenize lexbuf }
 | int               { Number (System.Int32.Parse(lexeme lexbuf)) }
@@ -26,6 +27,9 @@ rule tokenize = parse
 | "then"            { THEN }
 | "else"            { ELSE }
 | "undef"           { UNDEF }
+| '+'               { PLUS }
+| '-'               { MINUS }
+| '*'               { MULT }
 | '='               { EQ }
 
 

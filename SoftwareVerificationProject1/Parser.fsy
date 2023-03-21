@@ -13,42 +13,47 @@ let getOp op =
 %token EOF LPAREN RPAREN
        IF THEN ELSE UNDEF
        COLON SEMICOLON COMMA EQ
+       PLUS MINUS MULT
 
 %start prog
 %type <int> prog
 %%
 
-prog: funcn SEMICOLON expr SEMICOLON decn SEMICOLON EOF { $1 }
+prog: funcn SEMICOLON expr SEMICOLON decn SEMICOLON EOF { 1 }
 
 funcn // function declaration, aka first part in parser
-    : ID LPAREN RPAREN EQ expr
-    | ID LPAREN params RPAREN EQ expr
-    | funcn COMMA funcn // multiple declarations
+    : ID LPAREN RPAREN EQ expr { 1 }
+    | ID LPAREN params RPAREN EQ expr { 1 }
+    | funcn COMMA funcn { 1 } // multiple declarations 
 
 params
-    : ID
-    | ID COMMA params
+    : ID { 1 }
+    | ID COMMA params { 1 }
 
 expr
-    : term + expr
-    | term - minus
-    | term
+    : term PLUS expr { 1 }
+    | term MINUS minus { 1 }
+    | term { 1 }
 
 term
-    : factor * term
-    | factor
+    : factor MULT term { 1 }
+    | factor { 1 }
 
 minus
-    : term
-    | term - minus
+    : term { 1 }
+    | term MINUS minus { 1 }
 
 
 factor
-    : n
-    | var
-    | func
-    | LPAREN expr RPAREN
-    | IF expr THEN expr ELSE expr
+    : Number { 1 }
+    | ID { 1 }
+    | func { 1 }
+    | LPAREN expr RPAREN { 1 }
+    | IF expr THEN expr ELSE expr { 1 }
 
 func
-    : ID LPAREN ID RPAREN
+    : ID LPAREN ID RPAREN { 1 }
+
+decn
+    : ID EQ Number { 1 }
+    | decn COMMA decn { 1 }

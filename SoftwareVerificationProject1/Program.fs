@@ -1,9 +1,9 @@
 ﻿open System
 open FSharp.Text.Lexing
 
-let evaluate (input:string) =
+let evaluate input =
     let lexbuf = LexBuffer<char>.FromString input
-    let output = Parser.parse Lexer.tokenize lexbuf
+    let output = Parser.prog Lexer.tokenize lexbuf
     string output
 
 [<EntryPoint>]

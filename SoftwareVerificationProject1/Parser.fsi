@@ -4,20 +4,51 @@ type token =
   | EOF
   | LPAREN
   | RPAREN
+  | IF
+  | THEN
+  | ELSE
+  | UNDEF
+  | COLON
+  | SEMICOLON
+  | COMMA
+  | EQ
+  | PLUS
+  | MINUS
+  | MULT
+  | ID of (string)
   | OP of (string)
   | Number of (int)
 type tokenId = 
     | TOKEN_EOF
     | TOKEN_LPAREN
     | TOKEN_RPAREN
+    | TOKEN_IF
+    | TOKEN_THEN
+    | TOKEN_ELSE
+    | TOKEN_UNDEF
+    | TOKEN_COLON
+    | TOKEN_SEMICOLON
+    | TOKEN_COMMA
+    | TOKEN_EQ
+    | TOKEN_PLUS
+    | TOKEN_MINUS
+    | TOKEN_MULT
+    | TOKEN_ID
     | TOKEN_OP
     | TOKEN_Number
     | TOKEN_end_of_input
     | TOKEN_error
 type nonTerminalId = 
-    | NONTERM__startparse
-    | NONTERM_parse
+    | NONTERM__startprog
+    | NONTERM_prog
+    | NONTERM_funcn
+    | NONTERM_params
     | NONTERM_expr
+    | NONTERM_term
+    | NONTERM_minus
+    | NONTERM_factor
+    | NONTERM_func
+    | NONTERM_decn
 /// This function maps tokens to integer indexes
 val tagOfToken: token -> int
 
@@ -29,4 +60,4 @@ val prodIdxToNonTerminal: int -> nonTerminalId
 
 /// This function gets the name of a token as a string
 val token_to_string: token -> string
-val parse : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (int) 
+val prog : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (int) 
