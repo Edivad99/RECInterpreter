@@ -1,10 +1,5 @@
 ﻿%{
-let getOp op =
-    match op with
-    | "+" -> ( + )
-    | "-" -> ( - )
-    | "*" -> ( * )
-    | _ -> failwith "unknown operator"
+open SVProject1.Ast
 %}
 
 %token <int> Number
@@ -16,44 +11,48 @@ let getOp op =
        PLUS MINUS MULT
 
 %start prog
-%type <int> prog
+%type <SVProject1.Ast.Program> prog
 %%
 
-prog: funcn SEMICOLON expr SEMICOLON decn SEMICOLON EOF { 1 }
+prog: funcn SEMICOLON expr SEMICOLON decn SEMICOLON EOF { Program($1, $3, $5) }
 
-funcn // function declaration, aka first part in parser
-    : ID LPAREN RPAREN EQ expr { 1 }
-    | ID LPAREN params RPAREN EQ expr { 1 }
-    | funcn COMMA funcn { 1 } // multiple declarations 
+funcn
+    : ID LPAREN RPAREN EQ expr                          { [FuncDec($1, [], $5)] }
+    | ID LPAREN params RPAREN EQ expr                   { [FuncDec($1, $3, $6)] }
+    | funcn COMMA funcn                                 { $1 @ $3 }
 
 params
-    : ID { 1 }
-    | ID COMMA params { 1 }
+    : ID                                                { [$1] }
+    | ID COMMA params                                   { $1 :: $3 }
 
 expr
-    : term PLUS expr { 1 }
-    | term MINUS minus { 1 }
-    | term { 1 }
+    : term PLUS expr                                    { EOp($1, Plus, $3) }
+    | term MINUS minus                                  { EOp($1, Minus, $3) }
+    | term                                              { $1 }
 
 term
-    : factor MULT term { 1 }
-    | factor { 1 }
+    : factor MULT term                                  { EOp($1, Mult, $3) }
+    | factor                                            { $1 }
 
 minus
-    : term { 1 }
-    | term MINUS minus { 1 }
+    : term                                              { $1 }
+    | term MINUS minus                                  { EOp($1, Minus, $3) }
 
 
 factor
-    : Number { 1 }
-    | ID { 1 }
-    | func { 1 }
-    | LPAREN expr RPAREN { 1 }
-    | IF expr THEN expr ELSE expr { 1 }
+    : Number                                            { ENum(Some $1) }
+    | ID                                                { EVar $1 }
+    | func                                              { $1 }
+    | LPAREN expr RPAREN                                { $2 }
+    | IF expr THEN expr ELSE expr                       { ECond($2, $4, $6) }
+
+paramExpr
+    : expr                                              { [$1] }
+    | expr COMMA paramExpr                              { [$1] @ $3 }
 
 func
-    : ID LPAREN ID RPAREN { 1 }
+    : ID LPAREN paramExpr RPAREN                        { EFunc($1, $3) }
 
 decn
-    : ID EQ Number { 1 }
-    | decn COMMA decn { 1 }
+    : ID EQ Number                                      { [Def($1, Some $3)] }
+    | decn COMMA decn                                   { $1 @ $3 }

@@ -47,6 +47,7 @@ type nonTerminalId =
     | NONTERM_term
     | NONTERM_minus
     | NONTERM_factor
+    | NONTERM_paramExpr
     | NONTERM_func
     | NONTERM_decn
 /// This function maps tokens to integer indexes
@@ -60,4 +61,4 @@ val prodIdxToNonTerminal: int -> nonTerminalId
 
 /// This function gets the name of a token as a string
 val token_to_string: token -> string
-val prog : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (int) 
+val prog : (FSharp.Text.Lexing.LexBuffer<'cty> -> token) -> FSharp.Text.Lexing.LexBuffer<'cty> -> (SVProject1.Ast.Program) 
