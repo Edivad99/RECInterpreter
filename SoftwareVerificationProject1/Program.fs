@@ -1,4 +1,6 @@
-﻿open System
+﻿module SVProject1.Program
+
+open System
 open FSharp.Text.Lexing
 
 let evaluate input =
