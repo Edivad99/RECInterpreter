@@ -19,15 +19,15 @@ type Expr =
 
 type FuncDec = FuncDec of Variable * Variable list * Expr
 
-type Def = Def of Variable * int option
+type Def = Variable * int option
 
-type VEnv = Venv of Def list
+type VEnv = Def list
 
 type Program = Program of FuncDec list * Expr * VEnv
 
 
 // Interpreter types
 
-type Func = Func of Variable * (int option list -> int option)
+type Func = Variable * (int option list -> int option)
 type FEnv = Func list 
 type ProgramParsed = ProgramParsed of FEnv * Expr * VEnv
