@@ -16,7 +16,6 @@ type token =
   | MINUS
   | MULT
   | ID of (string)
-  | OP of (string)
   | Number of (int)
 type tokenId = 
     | TOKEN_EOF
@@ -34,7 +33,6 @@ type tokenId =
     | TOKEN_MINUS
     | TOKEN_MULT
     | TOKEN_ID
-    | TOKEN_OP
     | TOKEN_Number
     | TOKEN_end_of_input
     | TOKEN_error

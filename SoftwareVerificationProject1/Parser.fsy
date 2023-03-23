@@ -3,12 +3,15 @@ open SVProject1.Ast
 %}
 
 %token <int> Number
-%token <string> OP
 %token <string> ID
 %token EOF LPAREN RPAREN
        IF THEN ELSE UNDEF
        COLON SEMICOLON COMMA EQ
        PLUS MINUS MULT
+
+%left EQ
+%left PLUS MINUS
+%left MULT
 
 %start prog
 %type <SVProject1.Ast.Program> prog
