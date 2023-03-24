@@ -42,8 +42,6 @@ type nonTerminalId =
     | NONTERM_funcn
     | NONTERM_params
     | NONTERM_expr
-    | NONTERM_term
-    | NONTERM_minus
     | NONTERM_factor
     | NONTERM_paramExpr
     | NONTERM_func

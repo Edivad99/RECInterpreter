@@ -29,18 +29,10 @@ params
     | ID COMMA params                                   { $1 :: $3 }
 
 expr
-    : term PLUS expr                                    { EOp($1, Plus, $3) }
-    | term MINUS minus                                  { EOp($1, Minus, $3) }
-    | term                                              { $1 }
-
-term
-    : factor MULT term                                  { EOp($1, Mult, $3) }
-    | factor                                            { $1 }
-
-minus
-    : term                                              { $1 }
-    | term MINUS minus                                  { EOp($1, Minus, $3) }
-
+    : factor                                            { $1 }
+    | expr PLUS expr                                    { EOp($1, Plus, $3) }
+    | expr MINUS expr                                   { EOp($1, Minus, $3) }
+    | expr MULT expr                                    { EOp($1, Mult, $3) }
 
 factor
     : Number                                            { ENum(Some $1) }
