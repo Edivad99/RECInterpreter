@@ -1,4 +1,5 @@
 ﻿{
+open System
 open FSharp.Text.Lexing
 open Parser
 
@@ -8,7 +9,7 @@ let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
 let whitespace = [' ' '\t']
 let digit = ['0'-'9']
 let nat = digit+
-let int = ['-']?nat
+let int = ['-']? nat
 
 let idbody = ['A'-'Z' 'a'-'z' '0'-'9' '_']*
 let Uid = ['A'-'Z' '_'] idbody
@@ -18,7 +19,7 @@ let id = Uid | Lid
 
 rule tokenize = parse
 | whitespace        { tokenize lexbuf }
-| int               { Number (System.Int32.Parse(lexeme lexbuf)) }
+| int               { Number (Int32.Parse(lexeme lexbuf)) }
 | "if"              { IF }
 | "then"            { THEN }
 | "else"            { ELSE }

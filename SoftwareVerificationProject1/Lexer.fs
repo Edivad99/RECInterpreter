@@ -1,12 +1,13 @@
 module Lexer
 # 1 "Lexer.fsl"
  
+open System
 open FSharp.Text.Lexing
 open Parser
 
 let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
 
-# 9 "Lexer.fs"
+# 10 "Lexer.fs"
 let trans : uint16[] array = 
     [| 
     (* State 0 *)
@@ -91,94 +92,94 @@ let rec _fslex_dummy () = _fslex_dummy()
 and tokenize  lexbuf =
   match _fslex_tables.Interpret(0,lexbuf) with
   | 0 -> ( 
-# 20 "Lexer.fsl"
+# 21 "Lexer.fsl"
                                      tokenize lexbuf 
-# 96 "Lexer.fs"
+# 97 "Lexer.fs"
           )
   | 1 -> ( 
-# 21 "Lexer.fsl"
-                                     Number (System.Int32.Parse(lexeme lexbuf)) 
-# 101 "Lexer.fs"
+# 22 "Lexer.fsl"
+                                     Number (Int32.Parse(lexeme lexbuf)) 
+# 102 "Lexer.fs"
           )
   | 2 -> ( 
-# 22 "Lexer.fsl"
+# 23 "Lexer.fsl"
                                      IF 
-# 106 "Lexer.fs"
+# 107 "Lexer.fs"
           )
   | 3 -> ( 
-# 23 "Lexer.fsl"
+# 24 "Lexer.fsl"
                                      THEN 
-# 111 "Lexer.fs"
+# 112 "Lexer.fs"
           )
   | 4 -> ( 
-# 24 "Lexer.fsl"
+# 25 "Lexer.fsl"
                                      ELSE 
-# 116 "Lexer.fs"
+# 117 "Lexer.fs"
           )
   | 5 -> ( 
-# 25 "Lexer.fsl"
+# 26 "Lexer.fsl"
                                      UNDEF 
-# 121 "Lexer.fs"
+# 122 "Lexer.fs"
           )
   | 6 -> ( 
-# 26 "Lexer.fsl"
+# 27 "Lexer.fsl"
                                      PLUS 
-# 126 "Lexer.fs"
+# 127 "Lexer.fs"
           )
   | 7 -> ( 
-# 27 "Lexer.fsl"
+# 28 "Lexer.fsl"
                                      MINUS 
-# 131 "Lexer.fs"
+# 132 "Lexer.fs"
           )
   | 8 -> ( 
-# 28 "Lexer.fsl"
+# 29 "Lexer.fsl"
                                      MULT 
-# 136 "Lexer.fs"
+# 137 "Lexer.fs"
           )
   | 9 -> ( 
-# 29 "Lexer.fsl"
+# 30 "Lexer.fsl"
                                      EQ 
-# 141 "Lexer.fs"
+# 142 "Lexer.fs"
           )
   | 10 -> ( 
-# 33 "Lexer.fsl"
+# 34 "Lexer.fsl"
                                      LPAREN 
-# 146 "Lexer.fs"
+# 147 "Lexer.fs"
           )
   | 11 -> ( 
-# 34 "Lexer.fsl"
+# 35 "Lexer.fsl"
                                      RPAREN 
-# 151 "Lexer.fs"
+# 152 "Lexer.fs"
           )
   | 12 -> ( 
-# 37 "Lexer.fsl"
+# 38 "Lexer.fsl"
                                      COLON 
-# 156 "Lexer.fs"
+# 157 "Lexer.fs"
           )
   | 13 -> ( 
-# 38 "Lexer.fsl"
+# 39 "Lexer.fsl"
                                      SEMICOLON 
-# 161 "Lexer.fs"
+# 162 "Lexer.fs"
           )
   | 14 -> ( 
-# 39 "Lexer.fsl"
+# 40 "Lexer.fsl"
                                      COMMA 
-# 166 "Lexer.fs"
+# 167 "Lexer.fs"
           )
   | 15 -> ( 
-# 43 "Lexer.fsl"
+# 44 "Lexer.fsl"
                                      ID (lexeme lexbuf) 
-# 171 "Lexer.fs"
+# 172 "Lexer.fs"
           )
   | 16 -> ( 
-# 45 "Lexer.fsl"
+# 46 "Lexer.fsl"
                                      EOF 
-# 176 "Lexer.fs"
+# 177 "Lexer.fs"
           )
   | 17 -> ( 
-# 46 "Lexer.fsl"
+# 47 "Lexer.fsl"
                                      lexeme lexbuf |> sprintf "Parsing error: %s" |> failwith 
-# 181 "Lexer.fs"
+# 182 "Lexer.fs"
           )
   | _ -> failwith "tokenize"
 

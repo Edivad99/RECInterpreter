@@ -44,6 +44,7 @@ minus
 
 factor
     : Number                                            { ENum(Some $1) }
+    | UNDEF                                             { ENum(None) }
     | ID                                                { EVar $1 }
     | func                                              { $1 }
     | LPAREN expr RPAREN                                { $2 }
@@ -54,8 +55,10 @@ paramExpr
     | expr COMMA paramExpr                              { [$1] @ $3 }
 
 func
-    : ID LPAREN paramExpr RPAREN                        { EFunc($1, $3) }
+    : ID LPAREN RPAREN                                  { EFunc($1, []) }
+    | ID LPAREN paramExpr RPAREN                        { EFunc($1, $3) }
 
 decn
     : ID EQ Number                                      { [Def($1, Some $3)] }
+    | ID EQ UNDEF                                       { [Def($1, None)] }
     | decn COMMA decn                                   { $1 @ $3 }
