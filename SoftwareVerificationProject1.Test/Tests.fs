@@ -12,7 +12,12 @@ type TestInterpreter () =
     [<DataRow("f1(x) = if x then 1 else 0; f1(x); x = 1;", 0)>]
     [<DataRow("f1(x) = 2 - x * 2; f1(x); x = 2;", -2)>]
     [<DataRow("f1(x) = x * 2 - 2; f1(x); x = 2;", 2)>]
+    [<DataRow("f1(x) = 2 - x; f1(x); x = 2;", 0)>]
+    [<DataRow("f1(x) = x - 2; f1(x); x = 2;", 0)>]
+    [<DataRow("f1(x) = 2-x; f1(x); x = 2;", 0)>]
+    [<DataRow("f1(x) = x-2; f1(x); x = 2;", 0)>]
+    [<DataRow("f1(x) = 2- x; f1(x); x = 2;", 0)>]
+    [<DataRow("functional (n) = if n then 1 else functional(n-1) * n; functional (x); x = 3;", 6)>]
     member this.TestProgram (program, expected_result: int) =
         let result = interpreter(evaluate program)
         Assert.AreEqual(expected_result, result);
-

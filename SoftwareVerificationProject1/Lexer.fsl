@@ -8,8 +8,7 @@ let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
 
 let whitespace = [' ' '\t']
 let digit = ['0'-'9']
-let nat = digit+
-let int = ['-']? nat
+let int = digit+
 
 let idbody = ['A'-'Z' 'a'-'z' '0'-'9' '_']*
 let Uid = ['A'-'Z' '_'] idbody
@@ -36,7 +35,7 @@ rule tokenize = parse
 
 // punctuation
 | ':'               { COLON }
-| ";"               { SEMICOLON }
+| ';'               { SEMICOLON }
 | ','               { COMMA }
 
 
