@@ -53,20 +53,9 @@ let rec valueExpr (ProgramParsed(funcn, expr, decn)): int option =
 
 //-------------------------------------------
 
-(*let replaceVar (ds: VEnv, v: Variable, n: int option): VEnv =
-    List.map(fun (Def(name, value)) -> if name = v then Def(name, n) else Def(name, value)) ds
-
-let replaceVars (ds: VEnv, vars: Variable list, n: int option list): VEnv =
-    List.map2(fun v n -> replaceVar(ds, v, n)) vars n*)
-
-let rec replaceVar (ds: VEnv, v: Variable, n: int option): VEnv =
-    match ds with
-    | [] -> [Def(v, n)]
-    | (name, value) :: xs ->
-        if name = v then
-            Def(name, n) :: replaceVar(xs, v, n)
-        else
-            Def(name, value) :: replaceVar(xs, v, n)
+let replaceVar (ds: VEnv, v: Variable, n: int option): VEnv =
+    List.map(fun ((name, value)) -> if name = v then Def(name, n) else Def(name, value)) ds
+    |> List.append [Def(v, n)]
 
 let rec replaceVars (ds: VEnv, vars: Variable list, n: int option list): VEnv =
     match (vars, n) with
@@ -86,10 +75,11 @@ let rec functional(funcs: FuncDec list, ds: VEnv): FEnv -> FEnv =
 let rec rho (boh: FEnv -> FEnv, n: int): FEnv -> FEnv =
     match (boh, n) with
     | _, 0 -> id
-    | f, k -> rho (f, k - 1) >> f
+    | f, k -> fun x -> (x |> rho (f, k - 1) |> f)
 
 let findFix (Program(funcn, t, decn), k: int): int option =
-    let fix = rho (functional(funcn, decn), k) [bottom]
+    let r = rho (functional(funcn, decn), k)
+    let fix = r [bottom]
     in valueExpr(ProgramParsed(fix, t, decn))
 
 let interpreter input =
