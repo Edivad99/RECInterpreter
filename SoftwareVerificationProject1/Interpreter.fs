@@ -1,4 +1,4 @@
-﻿module SVProject1.Interpreter
+module SVProject1.Interpreter
 
 open SVProject1.Ast
 
@@ -63,13 +63,21 @@ let rec replaceVars (ds: VEnv, vars: Variable list, n: int option list): VEnv =
     | v::vs, n::ns -> replaceVars(replaceVar(ds, v, n), vs, ns)
     | _, _ -> failwithf "ERRORE replaceVars, due liste di diversa lunghezza"
 
+(*
+   FUNCTIONAL è una funzione che ritorna una funzione che aggiorna gli environment.
+   La funzione ritornata aggiorna gli envs aggiungendo un set di altre funzioni, espandendoli.
+   Le funzioni che vengono aggiunte sono quelle passate nella lista di definizioni che riceve functional.
+   In pratica, è una fabbrica di funzioni che espandono gli environment che ricevono allo stesso modo,
+   definito all'attivazione della fabbrica.
+*)
 let rec functional(funcs: FuncDec list, ds: VEnv): FEnv -> FEnv =
     match (funcs, ds) with
     | [], _ -> (fun _ -> [])
-    | FuncDec(name, parms, exp) :: fs, venv -> fun (fenv: FEnv) ->
-        let a = Func(name, (fun inp -> valueExpr(ProgramParsed(fenv, exp, (replaceVars(venv, parms, inp))))))
-        let b = functional (fs, venv) fenv
-        in a :: b
+    | FuncDec(name, parms, exp) :: fs, venv ->
+        fun (fenv: FEnv) -> 
+            let a = Func(name, (fun inp -> valueExpr (ProgramParsed(fenv, exp, (replaceVars(venv, parms, inp))) ) ) )
+            let b = functional (fs, venv) fenv
+            in a :: b
 
 // https://stackoverflow.com/questions/1904049/in-f-what-does-the-operator-mean
 let rec rho (boh: FEnv -> FEnv, n: int): FEnv -> FEnv =
