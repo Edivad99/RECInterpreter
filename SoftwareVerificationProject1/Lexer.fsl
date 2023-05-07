@@ -1,0 +1,46 @@
+﻿{
+open System
+open FSharp.Text.Lexing
+open Parser
+
+let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
+}
+
+let whitespace = [' ' '\t']
+let digit = ['0'-'9']
+let int = ['-']?digit+
+
+let idbody = ['A'-'Z' 'a'-'z' '0'-'9' '_']*
+let Uid = ['A'-'Z' '_'] idbody
+let Lid = ['a'-'z' '_'] idbody
+let id = Uid | Lid
+
+
+rule tokenize = parse
+| whitespace        { tokenize lexbuf }
+| int               { Number (Int32.Parse(lexeme lexbuf)) }
+| "if"              { IF }
+| "then"            { THEN }
+| "else"            { ELSE }
+| "undef"           { UNDEF }
+| '+'               { PLUS }
+| '-'               { MINUS }
+| '*'               { MULT }
+| '='               { EQ }
+
+
+// brakets
+| '('               { LPAREN }
+| ')'               { RPAREN }
+
+// punctuation
+| ':'               { COLON }
+| ';'               { SEMICOLON }
+| ','               { COMMA }
+
+
+// identifiers
+| id                { ID (lexeme lexbuf) }
+
+| eof               { EOF }
+| _                 { lexeme lexbuf |> sprintf "Parsing error: %s" |> failwith }

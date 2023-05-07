@@ -1,0 +1,100 @@
+﻿module SVProject1.Interpreter
+
+open SVProject1.Ast
+
+let valueVar(ds: VEnv, var: Variable): int option =
+    match List.tryFind(fun (name, _) -> name = var) ds with
+    | Some(_, value) -> value
+    | None -> None
+
+let bottom = Func("bottom", fun _ -> None)
+
+let valueFunc(fs: FEnv, var: Variable): Func =
+    match List.tryFind(fun (name, _) -> name = var) fs with
+    | Some(name, value) -> Func(name, value)
+    | None -> bottom
+
+let valueOp (op: Op, l: int option, r: int option): int option =
+    let calculate op l r =
+        match (l, r) with
+        | (Some l, Some r) -> Some(op l r)
+        | _ -> None
+    match op with
+    | Plus -> calculate ( + ) l r
+    | Minus -> calculate ( - ) l r
+    | Mult -> calculate ( * ) l r
+
+let valueCond (guard: int option, true_branch: int option, false_branch): int option =
+    match guard with
+    | Some(value) -> if value = 0 then true_branch else false_branch
+    | None -> None
+
+let rec valueExpr (ProgramParsed(funcn, expr, decn)): int option =
+
+    let valueParams(fs: FEnv, ds: VEnv, es: Expr list): int option list =
+        List.map (fun e -> valueExpr(ProgramParsed(fs, e, ds))) es
+
+    match expr with
+    | EVar v -> valueVar(decn, v)
+    | ENum n -> n
+    | EOp (l, op, r) ->
+        let left_expr = valueExpr(ProgramParsed(funcn, l, decn))
+        let right_expr = valueExpr(ProgramParsed(funcn, r, decn))
+        valueOp(op, left_expr, right_expr)
+    | ECond (guard, true_branch, false_branch) ->
+        let guard_expr = valueExpr(ProgramParsed(funcn, guard, decn))
+        let true_branch_expr = valueExpr(ProgramParsed(funcn, true_branch, decn))
+        let false_branch_expr = valueExpr(ProgramParsed(funcn, false_branch, decn))
+        valueCond(guard_expr, true_branch_expr, false_branch_expr)
+    | EFunc(f_name, pars) -> 
+        let (_, f) = valueFunc (funcn, f_name)
+        f(valueParams (funcn, decn, pars))
+
+
+//-------------------------------------------
+
+let replaceVar (ds: VEnv, v: Variable, n: int option): VEnv =
+    List.map(fun ((name, value)) -> if name = v then Def(name, n) else Def(name, value)) ds
+    |> List.append [Def(v, n)]
+
+let rec replaceVars (ds: VEnv, vars: Variable list, n: int option list): VEnv =
+    match (vars, n) with
+    | [], [] -> ds
+    | v::vs, n::ns -> replaceVars(replaceVar(ds, v, n), vs, ns)
+    | _ -> failwithf "ERRORE replaceVars, due liste di diversa lunghezza"
+
+(*
+   FUNCTIONAL è una funzione che ritorna una funzione che aggiorna gli environment.
+   La funzione ritornata aggiorna gli envs aggiungendo un set di altre funzioni, espandendoli.
+   Le funzioni che vengono aggiunte sono quelle passate nella lista di definizioni che riceve functional.
+   In pratica, è una fabbrica di funzioni che espandono gli environment che ricevono allo stesso modo,
+   definito all'attivazione della fabbrica.
+*)
+let rec functional(funcs: FuncDec list, venv: VEnv): FEnv -> FEnv =
+    match (funcs, venv) with
+    | [], _ -> (fun _ -> [])
+    | FuncDec(name, parms, exp) :: fs, venv ->
+        fun (fenv: FEnv) -> 
+            let a = Func(name, (fun inp -> valueExpr (ProgramParsed(fenv, exp, (replaceVars(venv, parms, inp))) ) ) )
+            let b = functional (fs, venv) fenv
+            in a :: b
+
+// https://stackoverflow.com/questions/1904049/in-f-what-does-the-operator-mean
+let rec rho (boh: FEnv -> FEnv, n: int): FEnv -> FEnv =
+    match (boh, n) with
+    | _, 0 -> id
+    | f, k -> fun x -> f(rho(f, k-1) x) //rho (f, k - 1) >> f //fun x -> (x |> rho (f, k - 1) |> f)
+
+let findFix (Program(funcn, t, decn), k: int): int option =
+    let r = rho (functional(funcn, decn), k)
+    let fix = r [bottom]
+    in valueExpr(ProgramParsed(fix, t, decn))
+
+let interpreter input =
+    let rec sub_iterpreter (n: int, input: Program) =
+        printfn "Iterazioni: %d" n
+        let findF = findFix (input, n)
+        match findF with
+        | Some n -> n
+        | None -> sub_iterpreter (n + 1, input)
+    sub_iterpreter (0, input)
