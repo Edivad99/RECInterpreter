@@ -14,18 +14,21 @@ let main args =
     printfn "Press Ctrl+c to Exit"
     while true do
         printf "Evaluate > "
-        //let input = Console.ReadLine()
-        let input1 = "f1(x) = if x then 1 else 0; f1(x); x = 1;"
-        let input2 = "f1(x1, x2) = x1 + 2, f2() = f2() + 1; 3 + f1(x1 + 2, f2()); x1 = 2;"
-        let input3 = "f2(x1) = x1 + 2; f2(y); y = undef;"
-        let input4 = "functional (n) = if n then 1 else functional(n-1) * n; functional (x); x = 3;"
-        let input5 = "functional (n) = if n then 1 else functional(n-1) * n; functional (-2);;"
-        let input6 = ";undef;;"
+        let input =
+            match 1 with
+            | 0 -> Console.ReadLine()
+            | 1 -> "f1(x) = x+2; f1(x); x = 2;"
+            | 2 -> "f1(a, b) = a + 2, f2() = f2(); f1(x1 * 3, f2()); x1 = 2;"
+            | 3 -> "f2(x1) = x1 + 2; f2(y); y = undef;"
+            | 4 -> "functional (n) = if n then 1 else functional(n-1) * n; functional (x); x = 3;"
+            | 5 -> "functional (n) = if n then 1 else functional(n-1) * n; functional (-2);;"
+            | 6 -> ";undef;;"
+            | _ -> ""
         try
-            Console.WriteLine(input1)
-            let result = evaluate input1
-            Console.WriteLine(result)
-            Console.WriteLine(interpreter result)
+            Console.WriteLine(input)
+            let program = evaluate input
+            Console.WriteLine(program)
+            Console.WriteLine(interpreter program)
         with ex -> Console.WriteLine(ex.ToString())
         Console.ReadKey() |> ignore
     0

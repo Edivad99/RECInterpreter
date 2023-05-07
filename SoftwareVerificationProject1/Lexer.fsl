@@ -8,7 +8,7 @@ let lexeme lexbuf = LexBuffer<_>.LexemeString lexbuf
 
 let whitespace = [' ' '\t']
 let digit = ['0'-'9']
-let int = digit+
+let int = ['-']?digit+
 
 let idbody = ['A'-'Z' 'a'-'z' '0'-'9' '_']*
 let Uid = ['A'-'Z' '_'] idbody

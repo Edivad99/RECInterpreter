@@ -42,7 +42,6 @@ expr
 factor
     : Number                                            { ENum(Some $1) }
     | UNDEF                                             { ENum(None) }
-    | MINUS Number                                      { ENum(Some -$2) }
     | MINUS UNDEF                                       { ENum(None) }
     | ID                                                { EVar $1 }
     | func                                              { $1 }

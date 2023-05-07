@@ -1,4 +1,4 @@
-module SVProject1.Interpreter
+﻿module SVProject1.Interpreter
 
 open SVProject1.Ast
 
@@ -61,7 +61,7 @@ let rec replaceVars (ds: VEnv, vars: Variable list, n: int option list): VEnv =
     match (vars, n) with
     | [], [] -> ds
     | v::vs, n::ns -> replaceVars(replaceVar(ds, v, n), vs, ns)
-    | _, _ -> failwithf "ERRORE replaceVars, due liste di diversa lunghezza"
+    | _ -> failwithf "ERRORE replaceVars, due liste di diversa lunghezza"
 
 (*
    FUNCTIONAL è una funzione che ritorna una funzione che aggiorna gli environment.
@@ -70,8 +70,8 @@ let rec replaceVars (ds: VEnv, vars: Variable list, n: int option list): VEnv =
    In pratica, è una fabbrica di funzioni che espandono gli environment che ricevono allo stesso modo,
    definito all'attivazione della fabbrica.
 *)
-let rec functional(funcs: FuncDec list, ds: VEnv): FEnv -> FEnv =
-    match (funcs, ds) with
+let rec functional(funcs: FuncDec list, venv: VEnv): FEnv -> FEnv =
+    match (funcs, venv) with
     | [], _ -> (fun _ -> [])
     | FuncDec(name, parms, exp) :: fs, venv ->
         fun (fenv: FEnv) -> 
@@ -83,7 +83,7 @@ let rec functional(funcs: FuncDec list, ds: VEnv): FEnv -> FEnv =
 let rec rho (boh: FEnv -> FEnv, n: int): FEnv -> FEnv =
     match (boh, n) with
     | _, 0 -> id
-    | f, k -> fun x -> (x |> rho (f, k - 1) |> f)
+    | f, k -> fun x -> f(rho(f, k-1) x) //rho (f, k - 1) >> f //fun x -> (x |> rho (f, k - 1) |> f)
 
 let findFix (Program(funcn, t, decn), k: int): int option =
     let r = rho (functional(funcn, decn), k)
@@ -92,6 +92,7 @@ let findFix (Program(funcn, t, decn), k: int): int option =
 
 let interpreter input =
     let rec sub_iterpreter (n: int, input: Program) =
+        printfn "Iterazioni: %d" n
         let findF = findFix (input, n)
         match findF with
         | Some n -> n
