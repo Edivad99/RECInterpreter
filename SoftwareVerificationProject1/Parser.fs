@@ -208,7 +208,7 @@ let _fsyacc_reductions = lazy [|
                 (
                    (
 # 20 "Parser.fsy"
-                                                                                     Program(_1, _3, _5) 
+                                                                                     Program(_1, _3, Map.ofList _5) 
                    )
 # 20 "Parser.fsy"
                  : SVProject1.Ast.Program));
@@ -492,7 +492,7 @@ let _fsyacc_reductions = lazy [|
                 (
                    (
 # 66 "Parser.fsy"
-                                                                               [Def(_1, Some _3)] 
+                                                                               [(_1, Some _3)] 
                    )
 # 66 "Parser.fsy"
                  : 'gentype_decn));
@@ -503,7 +503,7 @@ let _fsyacc_reductions = lazy [|
                 (
                    (
 # 67 "Parser.fsy"
-                                                                               [Def(_1, None)] 
+                                                                               [(_1, None)] 
                    )
 # 67 "Parser.fsy"
                  : 'gentype_decn));

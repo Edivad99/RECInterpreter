@@ -2,37 +2,34 @@
 
 open SVProject1.Ast
 
-let valueVar(ds: VEnv, var: Variable): int option =
-    match List.tryFind(fun (name, _) -> name = var) ds with
-    | Some(_, value) -> value
-    | None -> None
+let valueVar(venv: VEnv, name: string): int option = Map.tryFind name venv |> Option.flatten
 
-let bottom = Func("bottom", fun _ -> None)
+let bottom = Map.empty<_, (int option list -> int option)>.Add("bottom", fun _ -> None)
 
-let valueFunc(fs: FEnv, var: Variable): Func =
-    match List.tryFind(fun (name, _) -> name = var) fs with
-    | Some(name, value) -> Func(name, value)
-    | None -> bottom
+let valueFunc(fenv: FEnv, name: string): (int option list -> int option) =
+    match Map.tryFind name fenv with
+    | Some value -> value
+    | None -> fun _ -> None
 
-let valueOp (op: Op, l: int option, r: int option): int option =
+let valueOp (l: int option, op: Op, r: int option): int option =
     let calculate op l r =
         match (l, r) with
-        | (Some l, Some r) -> Some(op l r)
+        | Some l, Some r -> Some(op l r)
         | _ -> None
     match op with
     | Plus -> calculate ( + ) l r
     | Minus -> calculate ( - ) l r
     | Mult -> calculate ( * ) l r
 
-let valueCond (guard: int option, true_branch: int option, false_branch): int option =
+let valueCond (guard, true_branch, false_branch) =
     match guard with
-    | Some(value) -> if value = 0 then true_branch else false_branch
+    | Some value -> if value = 0 then true_branch else false_branch
     | None -> None
 
 let rec valueExpr (ProgramParsed(funcn, expr, decn)): int option =
 
-    let valueParams(fs: FEnv, ds: VEnv, es: Expr list): int option list =
-        List.map (fun e -> valueExpr(ProgramParsed(fs, e, ds))) es
+    let valueParams (fs: FEnv, venv: VEnv, es: Expr list): int option list =
+        List.map (fun e -> valueExpr(ProgramParsed(fs, e, venv))) es
 
     match expr with
     | EVar v -> valueVar(decn, v)
@@ -40,28 +37,21 @@ let rec valueExpr (ProgramParsed(funcn, expr, decn)): int option =
     | EOp (l, op, r) ->
         let left_expr = valueExpr(ProgramParsed(funcn, l, decn))
         let right_expr = valueExpr(ProgramParsed(funcn, r, decn))
-        valueOp(op, left_expr, right_expr)
+        valueOp(left_expr, op, right_expr)
     | ECond (guard, true_branch, false_branch) ->
         let guard_expr = valueExpr(ProgramParsed(funcn, guard, decn))
         let true_branch_expr = valueExpr(ProgramParsed(funcn, true_branch, decn))
         let false_branch_expr = valueExpr(ProgramParsed(funcn, false_branch, decn))
         valueCond(guard_expr, true_branch_expr, false_branch_expr)
-    | EFunc(f_name, pars) -> 
-        let (_, f) = valueFunc (funcn, f_name)
+    | EFunc (f_name, pars) ->
+        let f = valueFunc (funcn, f_name)
         f(valueParams (funcn, decn, pars))
-
 
 //-------------------------------------------
 
-let replaceVar (ds: VEnv, v: Variable, n: int option): VEnv =
-    List.map(fun ((name, value)) -> if name = v then Def(name, n) else Def(name, value)) ds
-    |> List.append [Def(v, n)]
-
-let rec replaceVars (ds: VEnv, vars: Variable list, n: int option list): VEnv =
-    match (vars, n) with
-    | [], [] -> ds
-    | v::vs, n::ns -> replaceVars(replaceVar(ds, v, n), vs, ns)
-    | _ -> failwithf "ERRORE replaceVars, due liste di diversa lunghezza"
+let replaceVars (venv: VEnv, vars: string list, n: int option list): VEnv =
+    (venv, vars, n)
+    |||> List.fold2 (fun venv v n -> venv.Add(v, n))
 
 (*
    FUNCTIONAL è una funzione che ritorna una funzione che aggiorna gli environment.
@@ -71,30 +61,28 @@ let rec replaceVars (ds: VEnv, vars: Variable list, n: int option list): VEnv =
    definito all'attivazione della fabbrica.
 *)
 let rec functional(funcs: FuncDec list, venv: VEnv): FEnv -> FEnv =
-    match (funcs, venv) with
-    | [], _ -> (fun _ -> [])
-    | FuncDec(name, parms, exp) :: fs, venv ->
+    match funcs with
+    | [] -> (fun _ -> Map.empty)
+    | FuncDec(name, parms, exp) :: fs ->
         fun (fenv: FEnv) -> 
-            let a = Func(name, (fun inp -> valueExpr (ProgramParsed(fenv, exp, (replaceVars(venv, parms, inp))) ) ) )
-            let b = functional (fs, venv) fenv
-            in a :: b
+            functional (fs, venv) fenv
+            |> Map.add name (fun inp -> valueExpr (ProgramParsed(fenv, exp, (replaceVars(venv, parms, inp))) ) )
 
 // https://stackoverflow.com/questions/1904049/in-f-what-does-the-operator-mean
-let rec rho (boh: FEnv -> FEnv, n: int): FEnv -> FEnv =
-    match (boh, n) with
-    | _, 0 -> id
-    | f, k -> fun x -> f(rho(f, k-1) x) //rho (f, k - 1) >> f //fun x -> (x |> rho (f, k - 1) |> f)
+let rec rho (f: FEnv -> FEnv) (n: int): FEnv -> FEnv =
+    match n with
+    | 0 -> id
+    | k -> fun funcn -> (rho f (k - 1)) (f funcn) //fun x -> f(rho(f, k-1) x) //rho (f, k - 1) >> f //fun x -> (x |> rho (f, k - 1) |> f)
 
 let findFix (Program(funcn, t, decn), k: int): int option =
-    let r = rho (functional(funcn, decn), k)
-    let fix = r [bottom]
-    in valueExpr(ProgramParsed(fix, t, decn))
+    let r = rho (functional(funcn, decn)) k
+    let fix = r bottom
+    valueExpr(ProgramParsed(fix, t, decn))
 
-let interpreter input =
+let interpreter input = 
     let rec sub_iterpreter (n: int, input: Program) =
         printfn "Iterazioni: %d" n
-        let findF = findFix (input, n)
-        match findF with
+        match findFix (input, n) with
         | Some n -> n
         | None -> sub_iterpreter (n + 1, input)
     sub_iterpreter (0, input)
