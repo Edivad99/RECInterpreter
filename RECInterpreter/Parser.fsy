@@ -1,5 +1,5 @@
 ﻿%{
-open SVProject1.Ast
+open Ast
 %}
 
 %token <int> Number
@@ -14,7 +14,7 @@ open SVProject1.Ast
 %left MULT
 
 %start prog
-%type <SVProject1.Ast.Program> prog
+%type <Ast.Program> prog
 %%
 
 prog: func_opt SEMICOLON expr SEMICOLON dec_opt SEMICOLON EOF { Program($1, $3, Map.ofList $5) }
@@ -35,26 +35,26 @@ params
 
 expr
     : factor                                            { $1 }
-    | expr PLUS expr                                    { EOp($1, Plus, $3) }
-    | expr MINUS expr                                   { EOp($1, Minus, $3) }
-    | expr MULT expr                                    { EOp($1, Mult, $3) }
+    | expr PLUS expr                                    { Op($1, Plus, $3) }
+    | expr MINUS expr                                   { Op($1, Minus, $3) }
+    | expr MULT expr                                    { Op($1, Mult, $3) }
 
 factor
-    : Number                                            { ENum(Some $1) }
-    | UNDEF                                             { ENum(None) }
-    | MINUS UNDEF                                       { ENum(None) }
-    | ID                                                { EVar $1 }
+    : Number                                            { Num(Some $1) }
+    | UNDEF                                             { Num(None) }
+    | MINUS UNDEF                                       { Num(None) }
+    | ID                                                { Var $1 }
     | func                                              { $1 }
     | LPAREN expr RPAREN                                { $2 }
-    | IF expr THEN expr ELSE expr                       { ECond($2, $4, $6) }
+    | IF expr THEN expr ELSE expr                       { Cond($2, $4, $6) }
 
 paramExpr
     : expr                                              { [$1] }
     | expr COMMA paramExpr                              { [$1] @ $3 }
 
 func
-    : ID LPAREN RPAREN                                  { EFunc($1, []) }
-    | ID LPAREN paramExpr RPAREN                        { EFunc($1, $3) }
+    : ID LPAREN RPAREN                                  { Func($1, []) }
+    | ID LPAREN paramExpr RPAREN                        { Func($1, $3) }
 
 
 dec_opt

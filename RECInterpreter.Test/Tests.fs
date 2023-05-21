@@ -1,8 +1,8 @@
 ﻿namespace SVProject1.Test
 
 open Microsoft.VisualStudio.TestTools.UnitTesting
-open SVProject1.Program
-open SVProject1.Interpreter
+open Program
+open Interpreter
 
 [<TestClass>]
 type TestInterpreter () =

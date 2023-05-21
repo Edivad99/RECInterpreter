@@ -20,6 +20,6 @@
 		</PackageReference>
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\SoftwareVerificationProject1\SoftwareVerificationProject1.fsproj" />
+		<ProjectReference Include="..\RECInterpreter\RECInterpreter.fsproj" />
 	</ItemGroup>
 </Project>

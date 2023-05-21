@@ -1,6 +1,6 @@
-﻿module SVProject1.Interpreter
+﻿module Interpreter
 
-open SVProject1.Ast
+open Ast
 
 let valueVar(venv: VEnv, name: string): int option = Map.tryFind name venv |> Option.flatten
 
@@ -32,18 +32,18 @@ let rec valueExpr (ProgramParsed(funcn, expr, decn)): int option =
         List.map (fun e -> valueExpr(ProgramParsed(fs, e, venv))) es
 
     match expr with
-    | EVar v -> valueVar(decn, v)
-    | ENum n -> n
-    | EOp (l, op, r) ->
+    | Var v -> valueVar(decn, v)
+    | Num n -> n
+    | Op (l, op, r) ->
         let left_expr = valueExpr(ProgramParsed(funcn, l, decn))
         let right_expr = valueExpr(ProgramParsed(funcn, r, decn))
         valueOp(left_expr, op, right_expr)
-    | ECond (guard, true_branch, false_branch) ->
+    | Cond (guard, true_branch, false_branch) ->
         let guard_expr = valueExpr(ProgramParsed(funcn, guard, decn))
         let true_branch_expr = valueExpr(ProgramParsed(funcn, true_branch, decn))
         let false_branch_expr = valueExpr(ProgramParsed(funcn, false_branch, decn))
         valueCond(guard_expr, true_branch_expr, false_branch_expr)
-    | EFunc (f_name, pars) ->
+    | Func (f_name, pars) ->
         let f = valueFunc (funcn, f_name)
         f(valueParams (funcn, decn, pars))
 
