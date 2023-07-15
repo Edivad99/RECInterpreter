@@ -14,13 +14,13 @@ let main args =
     while true do
         printf "Evaluate > "
         let input =
-            match 7 with
+            match 4 with
             | 0 -> Console.ReadLine()
-            | 1 -> "f1(x) = x+2; f1(x); x = 2;"
-            | 2 -> "f1(a, b) = a + 2, f2() = f2(); f1(x1 * 3, f2()); x1 = 2;"
-            | 3 -> "f2(x1) = x1 + 2; f2(y); y = undef;"
-            | 4 -> "functional (n) = if n then 1 else functional(n-1) * n; functional (x); x = 3;"
-            | 5 -> "functional (n) = if n then 1 else functional(n-1) * n; functional (-2);;"
+            | 1 -> "f(x) = x + 2; f(x); x = 2;" // CASO BASE
+            | 2 -> "f1(a, b) = a + 2, f2() = f2(); f1(x * 3, f2()); x = 2;" // CASO CALL-BY-NAME
+            | 3 -> "f(x) = x + 2; f(y); y = undef;" // CASO INFINITE LOOP
+            | 4 -> "fact(n) = if n then 1 else fact(n - 1) * n; fact(x); x = 3;" // CASO FACTORIAL
+            | 5 -> "fact(n) = if n then 1 else fact(n - 1) * n; fact(-2);;"
             | 6 -> ";undef;;"
             | 7 -> "f(x) = x + 1; f(x) + f(y);x = 3, y = 2;"
             | _ -> ""

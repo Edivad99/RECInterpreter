@@ -4,7 +4,7 @@ type Op =
     | Plus
     | Minus
     | Mult
-    override x.ToString() = sprintf "%A" x
+    override x.ToString() = $"%A{x}"
 
 type Expr =
     | Var of string
@@ -12,7 +12,7 @@ type Expr =
     | Cond of Expr * Expr * Expr
     | Op of Expr * Op * Expr
     | Func of string * Expr list
-    override x.ToString() = sprintf "%A" x
+    override x.ToString() = $"%A{x}"
 
 
 type FuncDec = FuncDec of string * string list * Expr

@@ -60,22 +60,26 @@ let replaceVars (venv: VEnv, vars: string list, n: int option list): VEnv =
    In pratica, è una fabbrica di funzioni che espandono gli environment che ricevono allo stesso modo,
    definito all'attivazione della fabbrica.
 *)
-let rec functional(funcs: FuncDec list, venv: VEnv): FEnv -> FEnv =
+(*
+    mentre nel linguaggio While il funzionale era una funzione Cond che prendeva un'altra funzione e
+    restituiva questa con le rispettive condizioni, qui il funzionale è applicato ad un Fenv, cioè delle
+    funzioni con già i loro parametri, e restituisce un Fenv le cui funzioni richiedono i valori dei parametri
+*)
+let rec updateEnv(funcs: FuncDec list, venv: VEnv): FEnv -> FEnv =
     match funcs with
     | [] -> (fun _ -> Map.empty)
     | FuncDec(name, parms, exp) :: fs ->
         fun (fenv: FEnv) -> 
-            functional (fs, venv) fenv
-            |> Map.add name (fun inp -> valueExpr (ProgramParsed(fenv, exp, (replaceVars(venv, parms, inp))) ) )
+            updateEnv (fs, venv) fenv
+            |> Map.add name (fun inp -> valueExpr (ProgramParsed(fenv, exp, replaceVars(venv, parms, inp)) ) )
 
-// https://stackoverflow.com/questions/1904049/in-f-what-does-the-operator-mean
 let rec rho (f: FEnv -> FEnv) (n: int): FEnv -> FEnv =
     match n with
     | 0 -> id
-    | k -> fun funcn -> (rho f (k - 1)) (f funcn) //fun x -> f(rho(f, k-1) x) //rho (f, k - 1) >> f //fun x -> (x |> rho (f, k - 1) |> f)
+    | k -> fun funcn -> (rho f (k - 1)) (f funcn)
 
 let findFix (Program(funcn, t, decn), k: int): int option =
-    let r = rho (functional(funcn, decn)) k
+    let r = rho (updateEnv(funcn, decn)) k
     let fix = r bottom
     valueExpr(ProgramParsed(fix, t, decn))
 
