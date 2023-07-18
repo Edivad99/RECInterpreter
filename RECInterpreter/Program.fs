@@ -28,7 +28,7 @@ let main args =
             Console.WriteLine(input)
             let program = evaluate input
             Console.WriteLine(program)
-            Console.WriteLine(interpreter program)
+            Console.WriteLine(interpreter program 0)
         with ex -> Console.WriteLine(ex.ToString())
         Console.ReadKey() |> ignore
     0
