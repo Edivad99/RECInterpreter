@@ -21,11 +21,6 @@ let valueOp (l: int option, op: Op, r: int option): int option =
     | Minus -> calculate ( - ) l r
     | Mult -> calculate ( * ) l r
 
-let valueCond (guard, true_branch, false_branch) =
-    match guard with
-    | Some value -> if value = 0 then true_branch else false_branch
-    | None -> None
-
 let rec valueExpr (ProgramParsed(f_decs, expr, v_decs)): int option =
     match expr with
     | Var v -> valueVar(v_decs, v)
@@ -36,9 +31,11 @@ let rec valueExpr (ProgramParsed(f_decs, expr, v_decs)): int option =
         valueOp(left_expr, op, right_expr)
     | Cond (guard, true_branch, false_branch) ->
         let guard_expr = valueExpr(ProgramParsed(f_decs, guard, v_decs))
-        let true_branch_expr = valueExpr(ProgramParsed(f_decs, true_branch, v_decs))
-        let false_branch_expr = valueExpr(ProgramParsed(f_decs, false_branch, v_decs))
-        valueCond(guard_expr, true_branch_expr, false_branch_expr)
+        match guard_expr with
+        | Some value ->
+            let branch = if value = 0 then true_branch else false_branch
+            valueExpr(ProgramParsed(f_decs, branch, v_decs))
+        | None -> None
     | Func (f_name, pars) ->
         let f = valueFunc (f_decs, f_name)
         f(valueParams (f_decs, v_decs, pars))
